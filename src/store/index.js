@@ -7,8 +7,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     currentPeoplePage: 1,
-    people: {},
-    planets: {},
+    people: [],
+    planets: [],
   },
   getters: {
     people: (state) => state.people,
@@ -24,7 +24,6 @@ export default new Vuex.Store({
         .get('https://swapi.dev/api/people/')
         .then((response) => response.data)
         .then((data) => {
-          console.log(data);
           commit('SET_PEOPLE', data.results);
         });
     },
