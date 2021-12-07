@@ -84,8 +84,7 @@
           class="people-list__person__item people-list__person__planet bg-yellow-400 font-semibold text-black hover:bg-yellow-500 hover:cursor-pointer"
           @click="showPlanetModal(person.planet)"
         >
-          <!-- {{ person.planet.name }} -->
-          View Planet
+          {{ person.planet.name }}
         </td>
       </tr>
     </table>
@@ -119,6 +118,12 @@
       :planet="currentPlanet"
       @closeModal="closePlanetModal"
     />
+  </div>
+  <div
+    v-else
+    class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700"
+  >
+    <h1>Getting people from a galaxy far, far away...</h1>
   </div>
 </template>
 
@@ -218,6 +223,7 @@ export default {
     },
 
     pagePeople(direction, pageUrl) {
+      this.peopleLoaded = false;
       const directionPageNumber = direction === 'previous' ?
         this.$store.getters.GET_CURRENT_PAGE.page - 1 :
         this.$store.getters.GET_CURRENT_PAGE.page + 1;
@@ -227,7 +233,6 @@ export default {
           console.log('Setting up planets');
           if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
             this.getPeoplesPlanets();
-            this.$nextTick();
           }
         });
     },
