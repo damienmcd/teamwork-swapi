@@ -1,7 +1,21 @@
 <template>
-  <div v-if="peopleLoaded" class="people-list-wrapper flex align-middle justify-center">
-    <table class="people-list w-full">
-      <tr class="people-list__header bg-gray-100">
+  <div v-if="peopleLoaded" class="people-list-wrapper flex flex-row flex-wrap align-middle justify-center">
+    <div class="search-wrapper w-full flex-shrink-0 flex align-middle justify-end py-4 px-10">
+      <div class="search">
+        <input
+          class="py-2 px-4 bg-white font-semibold border-2 border-solid border-gray-700"
+          type="text"
+          ref="searchText"
+          @keydown.enter="searchPeople"
+        >
+        <button
+          class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700"
+          @click="searchPeople"
+        >Search</button>
+      </div>
+    </div>
+    <table class="people-list w-full flex-shrink-0">
+      <tr class="people-list__header">
         <th
           class="people-list__header__item"
           :class="sortedClass('name')"
@@ -169,6 +183,10 @@ export default {
       return returnDate.toLocaleDateString();
     },
 
+    searchPeople() {
+      console.log(this.$refs.searchText.value);
+    },
+
     async getPeoplesPlanets() {
       const currentPeople = this.$store.getters.GET_PEOPLE;
       const currentPlanets = this.$store.getters.GET_PLANETS;
@@ -229,6 +247,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.search-wrapper {
+  background-color: $table-body;
+}
+
 .people-list {
   background-color: $table-body;
 
@@ -238,6 +260,11 @@ export default {
 
     &__item {
       padding: 0.5rem 1rem;
+
+      &:hover {
+        cursor: pointer;
+        background-color: lighten($color: $table-header, $amount: 20);
+      }
 
       &.sorted {
         &.asc::after {
