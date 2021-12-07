@@ -116,6 +116,7 @@ export default new Vuex.Store({
         });
 
       // Check people that have been loaded already to avoid unnecessary calls to the API
+      // This won't work as there may be some people that have yet to be retrieved from the API
       // for (const [pageNumber, page] of Object.entries(state.pagedPeople)) {
       //   if (page.hasOwnProperty("people") && Array.isArray(page.people)) {
       //     page.people.forEach((person) => {

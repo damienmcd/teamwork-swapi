@@ -166,9 +166,6 @@ export default {
       });
   },
 
-  mounted() {
-  },
-
   computed: {
     sortedPeople() {
       const peopleList = this.$store.getters.GET_CURRENT_PAGE_PEOPLE;
@@ -218,7 +215,7 @@ export default {
 
     dateDisplay(date) {
       const returnDate = new Date(date);
-      return returnDate.toLocaleDateString();
+      return returnDate.toUTCString();
     },
 
     searchPeople() {
@@ -235,7 +232,6 @@ export default {
 
     resetPeople() {
       this.peopleLoaded = false;
-
       this.$store.dispatch('GET_PAGE_PEOPLE_FROM_API', { page: 1, direction: 'next', pageUrl: 'https://swapi.dev/api/people/?page=1' })
         .then(() => {
           if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
@@ -285,26 +281,6 @@ export default {
       }
       this.peopleLoaded = true;
     },
-
-    // async getPersonsPlanet(homeworld) {
-    //   let personsPlanet;
-    //   const planetsIndex = this.$store.getters.GET_PLANETS.findIndex(
-    //     (planet) => planet.url === homeworld,
-    //   );
-
-    //   if (planetsIndex === -1) {
-    //     await axios
-    //       .get(homeworld)
-    //       .then((response) => response.data)
-    //       .then((planetData) => {
-    //         personsPlanet = planetData;
-    //       });
-    //   } else {
-    //     personsPlanet = this.$store.getters.GET_PLANETS[planetsIndex];
-    //   }
-
-    //   return personsPlanet;
-    // },
 
     showPlanetModal(planet) {
       this.currentPlanet = planet;

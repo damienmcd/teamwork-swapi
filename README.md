@@ -1,4 +1,4 @@
-# teamwork-swapi
+# Teamwork SWAPI Task (Damien McDonnell)
 
 ## [Project Setup](#setup)
 
@@ -68,3 +68,9 @@ Once a Page of People or details for a Planet have been retrieved, they will onl
 
 The Search does call the API each time as I found that just searching the contents of the Vuex store would mean that any People that have not already been retrieved as part of a call to get a page of People, would not be returned in my search results.
 The API has a Search endpoint for People so using that will retrieve all People, including those that have not already been displayed as part of a page of results.
+
+The details for the PlanetModal are an Object passed as props to the PlanetModal component.
+
+### Styling
+
+Styling of the application is done using TailwindCSS and I have also added some SCSS variables for the table styling.
