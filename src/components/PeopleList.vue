@@ -9,11 +9,12 @@
           @keydown.enter="searchPeople"
         >
         <button
-          class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700"
+          class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700 hover:bg-gray-800"
           @click="searchPeople"
         >Search</button>
       </div>
     </div>
+
     <table class="people-list w-full flex-shrink-0">
       <tr class="people-list__header">
         <th
@@ -83,11 +84,36 @@
           class="people-list__person__item people-list__person__planet bg-yellow-400 font-semibold text-black hover:bg-yellow-500 hover:cursor-pointer"
           @click="showPlanetModal(person.planet)"
         >
-          <!-- {{ person.planet ? person.planet.name : person.homeworld }} -->
-          {{ person.planet.name }}
+          <!-- {{ person.planet.name }} -->
+          View Planet
         </td>
       </tr>
     </table>
+
+    <div class="pagination-wrapper w-full flex-shrink-0 flex align-middle justify-end py-4 px-10">
+      <div class="pagination">
+        <button
+          v-show="$store.getters.GET_CURRENT_PAGE.previous"
+          class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700 hover:bg-gray-800"
+          @click="pagePeople('previous', $store.getters.GET_CURRENT_PAGE.previous)"
+        >Prev</button>
+
+        <div
+          class="pagination__number inline-block py-2 px-4 bg-white font-semibold border-2 border-solid border-gray-700"
+          min="1"
+          ref="paginationNumber"
+        >
+          {{ $store.getters.GET_CURRENT_PAGE.page }}
+        </div>
+
+        <button
+          v-show="$store.getters.GET_CURRENT_PAGE.next"
+          class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700 hover:bg-gray-800"
+          @click="pagePeople('next', $store.getters.GET_CURRENT_PAGE.next)"
+        >Next</button>
+      </div>
+    </div>
+
     <PlanetModal
       v-show="showModal"
       :planet="currentPlanet"
@@ -120,9 +146,9 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('GET_PEOPLE_FROM_API')
+    this.$store.dispatch('INIT_GET_PEOPLE_FROM_API')
       .then(() => {
-        if (this.$store.getters.GET_PEOPLE.length) {
+        if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
           this.getPeoplesPlanets();
         }
       });
@@ -133,7 +159,7 @@ export default {
 
   computed: {
     sortedPeople() {
-      const peopleList = this.$store.getters.GET_PEOPLE;
+      const peopleList = this.$store.getters.GET_CURRENT_PAGE_PEOPLE;
       if (this.sort.key) {
         if (this.sort.key === 'height' || this.sort.key === 'mass') {
           peopleList.sort((personA, personB) => {
@@ -187,8 +213,29 @@ export default {
       console.log(this.$refs.searchText.value);
     },
 
+    previousPeople() {
+      console.log('previousPeople');
+    },
+
+    pagePeople(direction, pageUrl) {
+      const directionPageNumber = direction === 'previous' ?
+        this.$store.getters.GET_CURRENT_PAGE.page - 1 :
+        this.$store.getters.GET_CURRENT_PAGE.page + 1;
+
+      this.$store.dispatch('GET_PAGE_PEOPLE_FROM_API', { page: directionPageNumber, direction: direction, pageUrl: pageUrl })
+        .then(() => {
+          console.log('Setting up planets');
+          if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
+            this.getPeoplesPlanets();
+            this.$nextTick();
+          }
+        });
+    },
+
     async getPeoplesPlanets() {
-      const currentPeople = this.$store.getters.GET_PEOPLE;
+      console.warn('getPeoplesPlanets');
+      const currentPeople = this.$store.getters.GET_CURRENT_PAGE_PEOPLE;
+      console.log({ currentPeople })
       const currentPlanets = this.$store.getters.GET_PLANETS;
       for (const person of currentPeople) {
         let personsPlanet;
@@ -213,25 +260,25 @@ export default {
       this.peopleLoaded = true;
     },
 
-    async getPersonsPlanet(homeworld) {
-      let personsPlanet;
-      const planetsIndex = this.$store.getters.GET_PLANETS.findIndex(
-        (planet) => planet.url === homeworld,
-      );
+    // async getPersonsPlanet(homeworld) {
+    //   let personsPlanet;
+    //   const planetsIndex = this.$store.getters.GET_PLANETS.findIndex(
+    //     (planet) => planet.url === homeworld,
+    //   );
 
-      if (planetsIndex === -1) {
-        await axios
-          .get(homeworld)
-          .then((response) => response.data)
-          .then((planetData) => {
-            personsPlanet = planetData;
-          });
-      } else {
-        personsPlanet = this.$store.getters.GET_PLANETS[planetsIndex];
-      }
+    //   if (planetsIndex === -1) {
+    //     await axios
+    //       .get(homeworld)
+    //       .then((response) => response.data)
+    //       .then((planetData) => {
+    //         personsPlanet = planetData;
+    //       });
+    //   } else {
+    //     personsPlanet = this.$store.getters.GET_PLANETS[planetsIndex];
+    //   }
 
-      return personsPlanet;
-    },
+    //   return personsPlanet;
+    // },
 
     showPlanetModal(planet) {
       this.currentPlanet = planet;
@@ -247,8 +294,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.search-wrapper {
+.search-wrapper, .pagination-wrapper {
   background-color: $table-body;
+}
+
+.pagination {
+  &__number {
+    width: 80px;
+  }
 }
 
 .people-list {
