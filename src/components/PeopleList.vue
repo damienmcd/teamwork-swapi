@@ -1,5 +1,5 @@
 <template>
-  <div class="people-list-wrapper flex align-middle justify-center">
+  <div v-if="peopleLoaded" class="people-list-wrapper flex align-middle justify-center">
     <table class="people-list w-full">
       <tr class="people-list__header bg-gray-100">
         <th
@@ -65,22 +65,34 @@
         <td class="people-list__person__item people-list__person__edited">
           {{ person.edited }}
         </td>
-        <td class="people-list__person__item people-list__person__planet">
-          {{ person.homeworld }}
+        <td
+          class="people-list__person__item people-list__person__planet bg-yellow-400 font-semibold text-black hover:bg-yellow-500 hover:cursor-pointer"
+          @click="showPlanetModal(person.planet)"
+        >
+          <!-- {{ person.planet ? person.planet.name : person.homeworld }} -->
+          {{ person.planet.name }}
         </td>
       </tr>
     </table>
+    <PlanetModal
+      v-show="showModal"
+      :planet="currentPlanet"
+      @closeModal="closePlanetModal"
+    />
   </div>
 </template>
 
 <script>
-// import { mapState } from 'vuex';
+import axios from 'axios';
+import PlanetModal from './PlanetModal.vue';
 
 export default {
   name: 'PeopleList',
-  props: {
-    msg: String,
+
+  components: {
+    PlanetModal,
   },
+
   data() {
     return {
       peopleLoaded: false,
@@ -88,20 +100,40 @@ export default {
         key: '',
         isAsc: false,
       },
+      showModal: false,
+      currentPlanet: null,
     };
   },
+
   created() {
-    this.$store.dispatch('GET_PEOPLE');
+    this.$store.dispatch('GET_PEOPLE_FROM_API')
+      .then(() => {
+        if (this.$store.getters.GET_PEOPLE.length) {
+          this.getPeoplesPlanets();
+        }
+      });
   },
+
+  mounted() {
+  },
+
   computed: {
     sortedPeople() {
-      const peopleList = this.$store.getters.people;
+      const peopleList = this.$store.getters.GET_PEOPLE;
       if (this.sort.key) {
         // Need to parseInt for Height and Mass
         if (this.sort.key === 'height' || this.sort.key === 'mass') {
           peopleList.sort((personA, personB) => {
             const aSorted = parseInt(personA[this.sort.key], 10);
             const bSorted = parseInt(personB[this.sort.key], 10);
+            const sortOrder = aSorted > bSorted ? 1 : -1;
+
+            return (aSorted === bSorted ? 0 : sortOrder) * (this.sort.isAsc ? 1 : -1);
+          });
+        } else if (this.sort.key === 'planet') {
+          peopleList.sort((personA, personB) => {
+            const aSorted = personA[this.sort.key];
+            const bSorted = personB[this.sort.key];
             const sortOrder = aSorted > bSorted ? 1 : -1;
 
             return (aSorted === bSorted ? 0 : sortOrder) * (this.sort.isAsc ? 1 : -1);
@@ -119,13 +151,70 @@ export default {
       return peopleList;
     },
   },
+
   methods: {
     sortedClass(key) {
       return this.sort.key === key ? `sorted ${this.sort.isAsc ? 'asc' : 'desc'}` : '';
     },
+
     sortBy(key) {
       this.sort.isAsc = this.sort.key === key ? !this.sort.isAsc : false;
       this.sort.key = key;
+    },
+
+    async getPeoplesPlanets() {
+      const currentPeople = this.$store.getters.GET_PEOPLE;
+      const currentPlanets = this.$store.getters.GET_PLANETS;
+      for (const person of currentPeople) {
+        let personsPlanet;
+        const planetsIndex = currentPlanets.findIndex(
+          (planet) => planet.url === person.homeworld,
+        );
+
+        if (planetsIndex === -1) {
+          await axios
+            .get(person.homeworld)
+            .then((response) => response.data)
+            .then((planetData) => {
+              personsPlanet = planetData;
+              this.$store.dispatch('ADD_PLANET_TO_PLANETS', planetData);
+            });
+        } else {
+          personsPlanet = this.$store.getters.GET_PLANETS[planetsIndex];
+        }
+
+        person.planet = personsPlanet;
+      }
+      this.peopleLoaded = true;
+    },
+
+    async getPersonsPlanet(homeworld) {
+      let personsPlanet;
+      const planetsIndex = this.$store.getters.GET_PLANETS.findIndex(
+        (planet) => planet.url === homeworld,
+      );
+
+      if (planetsIndex === -1) {
+        await axios
+          .get(homeworld)
+          .then((response) => response.data)
+          .then((planetData) => {
+            personsPlanet = planetData;
+          });
+      } else {
+        personsPlanet = this.$store.getters.GET_PLANETS[planetsIndex];
+      }
+
+      return personsPlanet;
+    },
+
+    showPlanetModal(planet) {
+      this.currentPlanet = planet;
+      this.showModal = true;
+    },
+
+    closePlanetModal() {
+      this.showModal = false;
     },
   },
 };
@@ -142,6 +231,17 @@ export default {
 
     &__item {
       padding: 0.5rem 1rem;
+
+      &.sorted {
+        &.asc::after {
+          display: inline-block;
+          content: '▼';
+        }
+        &.desc::after {
+          display: inline-block;
+          content: '▲';
+        }
+      }
     }
   }
 

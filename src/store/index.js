@@ -6,26 +6,41 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    currentPeoplePage: 1,
+    currentPage: 0,
     people: [],
     planets: [],
   },
+
   getters: {
-    people: (state) => state.people,
+    GET_PEOPLE: (state) => state.people,
+
+    GET_PLANETS: (state) => state.planets,
   },
+
   mutations: {
     SET_PEOPLE(state, people) {
       state.people = people;
     },
+
+    ADD_PLANET_TO_PLANETS(state, planet) {
+      state.planets.push(planet);
+    },
   },
+
   actions: {
-    GET_PEOPLE({ commit }) {
-      axios
+    async GET_PEOPLE_FROM_API({ commit }) {
+      await axios
         .get('https://swapi.dev/api/people/')
         .then((response) => response.data)
-        .then((data) => {
-          commit('SET_PEOPLE', data.results);
+        .then((peopleData) => {
+          if (peopleData.results.length) {
+            commit('SET_PEOPLE', peopleData.results);
+          }
         });
+    },
+
+    ADD_PLANET_TO_PLANETS({ commit }, planet) {
+      commit('ADD_PLANET_TO_PLANETS', planet);
     },
   },
   modules: {},
