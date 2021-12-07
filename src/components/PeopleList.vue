@@ -127,7 +127,7 @@
   </div>
   <div
     v-else
-    class="py-2 px-4 bg-black text-yellow-400 font-semibold border-2 border-solid border-gray-700"
+    class="py-2 px-4 bg-black text-yellow-400 font-semibold"
   >
     <h1>Getting people from a galaxy far, far away...</h1>
   </div>
@@ -224,10 +224,8 @@ export default {
     searchPeople() {
       this.peopleLoaded = false;
       const searchString = this.$refs.searchText.value;
-      console.log(searchString);
       this.$store.dispatch('GET_SEARCH_PERSON', { search: searchString })
         .then(() => {
-          console.log('Setting up planets');
           if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
             this.getPeoplesPlanets();
           }
@@ -240,16 +238,11 @@ export default {
 
       this.$store.dispatch('GET_PAGE_PEOPLE_FROM_API', { page: 1, direction: 'next', pageUrl: 'https://swapi.dev/api/people/?page=1' })
         .then(() => {
-          console.log('Setting up planets');
           if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
             this.getPeoplesPlanets();
           }
           this.searchActive = false;
         });
-    },
-
-    previousPeople() {
-      console.log('previousPeople');
     },
 
     pagePeople(direction, pageUrl) {
@@ -260,7 +253,6 @@ export default {
 
       this.$store.dispatch('GET_PAGE_PEOPLE_FROM_API', { page: directionPageNumber, direction: direction, pageUrl: pageUrl })
         .then(() => {
-          console.log('Setting up planets');
           if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
             this.getPeoplesPlanets();
           }
@@ -270,7 +262,6 @@ export default {
     async getPeoplesPlanets() {
       console.warn('getPeoplesPlanets');
       const currentPeople = this.$store.getters.GET_CURRENT_PAGE_PEOPLE;
-      console.log({ currentPeople })
       const currentPlanets = this.$store.getters.GET_PLANETS;
       for (const person of currentPeople) {
         let personsPlanet;
@@ -330,7 +321,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .search-wrapper, .pagination-wrapper {
-  background-color: $table-body;
+  background-color: $light-grey;
 }
 
 .pagination {
@@ -340,10 +331,10 @@ export default {
 }
 
 .people-list {
-  background-color: $table-body;
+  background-color: $light-grey;
 
   &__header {
-    background-color: $table-header;
+    background-color: $dark-grey;
     color: white;
 
     &__item {
@@ -351,7 +342,7 @@ export default {
 
       &:hover {
         cursor: pointer;
-        background-color: lighten($color: $table-header, $amount: 20);
+        background-color: lighten($color: $dark-grey, $amount: 20);
       }
 
       &.sorted {
@@ -368,9 +359,9 @@ export default {
   }
 
   &__person {
-    border-top: solid 1px $table-border;
+    border-top: solid 1px $mid-grey;
     &:last-child {
-      border-bottom: solid 1px $table-border;
+      border-bottom: solid 1px $mid-grey;
     }
 
     &__item {

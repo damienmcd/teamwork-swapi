@@ -29,7 +29,6 @@ export default new Vuex.Store({
 
     SET_PAGED_PEOPLE(state, payload) {
       if (!state.pagedPeople.hasOwnProperty(payload.page)) {
-        console.log("Page " + payload.page + " not found in pagedPeople");
         const newPage = { people: payload.people, previous: payload.previous, next: payload.next };
         state.pagedPeople[payload.page] = newPage;
       }
@@ -50,7 +49,6 @@ export default new Vuex.Store({
         .get("https://swapi.dev/api/people/")
         .then((response) => response.data)
         .then((peopleData) => {
-          console.log({ peopleData });
           if (peopleData.results.length) {
             commit("SET_CURRENT_PAGE_PEOPLE", peopleData.results);
             commit("SET_PAGED_PEOPLE", {
@@ -69,7 +67,6 @@ export default new Vuex.Store({
     },
 
     async GET_PAGE_PEOPLE_FROM_API({ state, commit }, payload) {
-      console.log({ payload });
       if (!state.pagedPeople.hasOwnProperty(payload.page)) {
         await axios
           .get(payload.pageUrl)
@@ -91,7 +88,6 @@ export default new Vuex.Store({
             }
           });
       } else {
-        console.log(state.pagedPeople[payload.page]);
         commit("SET_CURRENT_PAGE_PEOPLE", state.pagedPeople[payload.page].people);
         commit("SET_CURRENT_PAGE", {
           page: payload.page,
@@ -104,7 +100,6 @@ export default new Vuex.Store({
     async GET_SEARCH_PERSON({ state, commit }, payload) {
       let foundPeople = [];
       const searchUrl = "https://swapi.dev/api/people/?search=" + payload.search;
-      console.log({ searchUrl });
 
       await axios
         .get(searchUrl)
@@ -131,8 +126,6 @@ export default new Vuex.Store({
       //     });
       //   }
       // }
-
-      console.log({ foundPeople });
     },
 
     ADD_PLANET_TO_PLANETS({ commit }, planet) {
