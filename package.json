@@ -1,5 +1,10 @@
 {
   "name": "teamwork-swapi",
+  "description": "VueJS frontend for listing and searching Star Wars characters from the swapi.dev API.",
+  "author": {
+    "name" : "Damien McDonnell",
+    "email" : "damienmcd@gmail.com"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
