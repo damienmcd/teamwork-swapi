@@ -8,7 +8,7 @@
         <div class="modal__close"></div>
       </div>
 
-      <div class="modal__content w-full">
+      <div v-if="planet" class="modal__content w-full">
         <div class="modal__content__header mb-2 font-bold text-lg">
           {{ planet.name }}
         </div>
@@ -31,9 +31,6 @@ export default {
   name: 'PlanetModal',
   props: {
     planet: Object,
-  },
-
-  mounted() {
   },
 
   methods: {

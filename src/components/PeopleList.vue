@@ -60,10 +60,10 @@
           {{ person.mass }}
         </td>
         <td class="people-list__person__item people-list__person__created">
-          {{ person.created }}
+          {{ dateDisplay(person.created) }}
         </td>
         <td class="people-list__person__item people-list__person__edited">
-          {{ person.edited }}
+          {{ dateDisplay(person.edited) }}
         </td>
         <td
           class="people-list__person__item people-list__person__planet bg-yellow-400 font-semibold text-black hover:bg-yellow-500 hover:cursor-pointer"
@@ -121,9 +121,9 @@ export default {
     sortedPeople() {
       const peopleList = this.$store.getters.GET_PEOPLE;
       if (this.sort.key) {
-        // Need to parseInt for Height and Mass
         if (this.sort.key === 'height' || this.sort.key === 'mass') {
           peopleList.sort((personA, personB) => {
+            // Need to parseInt for Height and Mass
             const aSorted = parseInt(personA[this.sort.key], 10);
             const bSorted = parseInt(personB[this.sort.key], 10);
             const sortOrder = aSorted > bSorted ? 1 : -1;
@@ -132,14 +132,16 @@ export default {
           });
         } else if (this.sort.key === 'planet') {
           peopleList.sort((personA, personB) => {
-            const aSorted = personA[this.sort.key];
-            const bSorted = personB[this.sort.key];
+            // Sort on the "name" object key
+            const aSorted = personA[this.sort.key]['name'];
+            const bSorted = personB[this.sort.key]['name'];
             const sortOrder = aSorted > bSorted ? 1 : -1;
 
             return (aSorted === bSorted ? 0 : sortOrder) * (this.sort.isAsc ? 1 : -1);
           });
         } else {
           peopleList.sort((a, b) => {
+            // Sort on the table column key
             const aSorted = a[this.sort.key];
             const bSorted = b[this.sort.key];
             const sortOrder = aSorted > bSorted ? 1 : -1;
@@ -160,6 +162,11 @@ export default {
     sortBy(key) {
       this.sort.isAsc = this.sort.key === key ? !this.sort.isAsc : false;
       this.sort.key = key;
+    },
+
+    dateDisplay(date) {
+      const returnDate = new Date(date);
+      return returnDate.toLocaleDateString();
     },
 
     async getPeoplesPlanets() {
