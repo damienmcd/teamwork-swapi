@@ -12,6 +12,11 @@
           class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700 hover:bg-gray-800"
           @click="searchPeople"
         >Search</button>
+        <button
+          v-if="searchActive"
+          class="py-2 px-4 bg-gray-800 text-white font-semibold border-2 border-solid border-gray-800 hover:bg-gray-900"
+          @click="resetPeople"
+        >Reset</button>
       </div>
     </div>
 
@@ -98,6 +103,7 @@
         >Prev</button>
 
         <div
+          v-show="$store.getters.GET_CURRENT_PAGE.page > 0"
           class="pagination__number inline-block py-2 px-4 bg-white font-semibold border-2 border-solid border-gray-700"
           min="1"
           ref="paginationNumber"
@@ -121,7 +127,7 @@
   </div>
   <div
     v-else
-    class="py-2 px-4 bg-gray-700 text-white font-semibold border-2 border-solid border-gray-700"
+    class="py-2 px-4 bg-black text-yellow-400 font-semibold border-2 border-solid border-gray-700"
   >
     <h1>Getting people from a galaxy far, far away...</h1>
   </div>
@@ -141,6 +147,7 @@ export default {
   data() {
     return {
       peopleLoaded: false,
+      searchActive: false,
       sort: {
         key: '',
         isAsc: false,
@@ -215,7 +222,30 @@ export default {
     },
 
     searchPeople() {
-      console.log(this.$refs.searchText.value);
+      this.peopleLoaded = false;
+      const searchString = this.$refs.searchText.value;
+      console.log(searchString);
+      this.$store.dispatch('GET_SEARCH_PERSON', { search: searchString })
+        .then(() => {
+          console.log('Setting up planets');
+          if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
+            this.getPeoplesPlanets();
+          }
+          this.searchActive = true;
+        });
+    },
+
+    resetPeople() {
+      this.peopleLoaded = false;
+
+      this.$store.dispatch('GET_PAGE_PEOPLE_FROM_API', { page: 1, direction: 'next', pageUrl: 'https://swapi.dev/api/people/?page=1' })
+        .then(() => {
+          console.log('Setting up planets');
+          if (this.$store.getters.GET_CURRENT_PAGE_PEOPLE.length) {
+            this.getPeoplesPlanets();
+          }
+          this.searchActive = false;
+        });
     },
 
     previousPeople() {
